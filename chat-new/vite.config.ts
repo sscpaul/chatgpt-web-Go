@@ -8,4 +8,7 @@ export default defineConfig({
       '/completion': 'http://localhost:8080',
     },
   },
+  build: {
+    outDir: '../build/chatgpt-web/website/',
+  } 
 })

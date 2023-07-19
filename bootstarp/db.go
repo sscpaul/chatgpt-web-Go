@@ -4,6 +4,7 @@ import (
 	"github.com/869413421/chatgpt-web/config"
 	"github.com/869413421/chatgpt-web/pkg/logger"
 	"github.com/869413421/chatgpt-web/pkg/model"
+	"github.com/869413421/chatgpt-web/pkg/model/chat"
 	"github.com/869413421/chatgpt-web/pkg/model/user"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ func SetupDB() {
 
 // migration 迁移
 func migration(db *gorm.DB) {
-	err := db.AutoMigrate(&user.User{})
+	err := db.AutoMigrate(&user.User{}, &chat.Record{})
 	if err != nil {
 		logger.Danger("migration model error:", err)
 	}
@@ -34,7 +35,7 @@ func insertAdmin() {
 			logger.Danger("insert admin error:", err)
 		}
 		if err == gorm.ErrRecordNotFound {
-			_, err = user.CreateUser(cf.AuthUser, cf.AuthPassword)
+			_, err = user.CreateUser(cf.AuthUser, cf.AuthPassword, true)
 			if err != nil {
 				logger.Danger("create admin error:", err)
 			}

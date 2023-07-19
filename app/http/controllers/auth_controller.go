@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/869413421/chatgpt-web/pkg/auth"
 	"github.com/869413421/chatgpt-web/pkg/model/user"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 // AuthController 认证控制器
@@ -72,7 +73,9 @@ func (c *AuthController) Info(ctx *gin.Context) {
 	}
 	// 未实现权限系统，写死
 	c.ResponseJson(ctx, http.StatusOK, "", gin.H{
-		"info":             userInfo,
-		"permissionRoutes": []string{"chat", "chat/completion", "user/auth/info", "user/auth"},
+		"info": userInfo,
+		"permissionRoutes": []string{"chat", "chat/completion", "chat/userchatrecord",
+			"chat/renamesubject", "chat/deletechat", "chat/getconfig", "chat/setconfig",
+			"user/updatepassword", "user/createuser", "user/auth/info", "user/auth"},
 	})
 }

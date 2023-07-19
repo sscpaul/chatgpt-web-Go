@@ -1,21 +1,23 @@
 import './chat.css'
 import css from '../../App.module.css'
 import '../../chatui-theme.css'
-import Chat, {
-  Bubble,
-  MessageProps,
-  Progress,
-  toast,
-  useMessages,
-} from '@chatui/core'
+import Chat, { Bubble, MessageProps, Progress, toast, useMessages } from '@chatui/core'
 import '@chatui/core/dist/index.css'
 import '@chatui/core/es/styles/index.less'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import clipboardy from 'clipboardy'
 import MdEditor from "md-editor-rt"
 import "md-editor-rt/lib/style.css"
 import sanitizeHtml from 'sanitize-html';
-import {completion} from '../../services/port'
+import {completion, getChatRecord, getChatMessages, updatePassword, createUser} from '../../services/port'
+import { ChatSidebar } from '../../components/ChatSidebar'
+import {v4 as uuidv4}  from 'uuid'
+import { FloatButton, Layout, message } from 'antd'
+import { LeftCircleTwoTone, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { deleteCookie } from '../../utils/cookie'
+import { redirect } from 'react-router-dom'
+import Sider from 'antd/es/layout/Sider'
+import { Content, Footer } from 'antd/es/layout/layout'
 
 const defaultQuickReplies = [
   {
@@ -36,23 +38,58 @@ const initialMessages = [
     content: {
       text: '您好，我是AI助理',
     },
-    user: { avatar: '//gitclone.com/download1/gitclone.png' },
+    user: { avatar: '/logo192.png' },
   },
 ]
 
-let chatContext: any[] = []
+let chatContext: { userid: number, chatid: string, subject: string, messages: any[] } = 
+  { userid: 1, chatid: uuidv4(), subject: '这是新的会话', messages: [] }
 
 function App() {
-  const { messages, appendMsg, setTyping, prependMsgs } = useMessages(initialMessages)
+  const { messages, appendMsg, setTyping, prependMsgs, resetList } = useMessages(initialMessages)
   const [percentage, setPercentage] = useState(0)
+  const [collapsed, setCollapsed] = useState(false);
+  const [toggled, setToggled] = useState(false);
+  const [chatData, setChatData] = useState<{UserID: string, UserName: string, IsAdmin: boolean, ChatRecord: 
+        {ID: number, ChatID: string, Subject: string, CreatedAt: string, UpdatedAt: string}[]}>
+        ({UserID: '', UserName: '', IsAdmin: false, ChatRecord:[]})
+  const [messageApi, contextHolder] = message.useMessage();      
+  
+  // 根据角色添加消息
+  function appendMessage(role: string, content: string) {
+    switch (role) {
+      case 'user':
+        appendMsg({
+          type: 'text',
+          content: { text: content },
+          position: 'left',
+          user: { avatar: '/sscpaul.png' },
+        })
+        break;
+      case 'assistant':
+        appendMsg({
+          type: 'text',
+          content: { text: content },
+          position: 'left',
+          user: { avatar: '/logo192.png' },
+        })
+        break;
+      case 'system':
+        appendMsg({
+          type: 'text',
+          content: { text: initialMessages[0].content.text },
+          position: 'left',
+          user: { avatar: '/logo192.png' },
+        })
+        break;
+    }
+  }
 
   const handleFocus = () => {
     setTimeout(() => {
       window.scrollTo(0, document.body.scrollHeight)
-
     }, 10)
   }
-
 
   // clearQuestion 清空文本特殊字符
   function clearQuestion(requestText: string) {
@@ -82,7 +119,7 @@ function App() {
         type: 'text',
         content: { text: val },
         position: 'left',
-        user: { avatar: '//gitclone.com/download1/user.png' },
+        user: { avatar: '/sscpaul.png' },
       })
 
       setTyping(true)
@@ -121,10 +158,11 @@ function App() {
 
   async function handleQuickReplyClick(item: { name: string }) {
     if (item.name === '清空会话') {
-
-      chatContext.splice(0)
-      messages.splice(0)
-      prependMsgs(messages)
+      // 清空已有消息
+      resetList([])
+      // 新增初始化消息
+      appendMessage('assistant', initialMessages[0].content.text)
+      chatContext.messages.splice(0)
     }
     if (item.name === '复制会话') {
       if (messages.length <= 1) {
@@ -143,60 +181,136 @@ function App() {
 
   async function onGenCode(question: string) {
     question = clearQuestion(question)
-    chatContext.push({
+    chatContext.messages.splice(0)         // 清空聊天记录，只传递最后一条
+    chatContext.messages.push({
       role: 'user',
       content: question,
     })
 
-
     const res = await completion(chatContext);
+    setPercentage(0)
     if (res.data.code === 200) {
-      let reply = clearReply(res.data.data.reply)
-      appendMsg({
-        type: 'text',
-        content: { text: reply },
-        user: { avatar: '//gitclone.com/download1/gitclone.png' },
-      })
-      chatContext = res.data.data.messages
-      console.log(chatContext)
-      setPercentage(0)
-
+      // 检查菜单项目是否包含该主题，不包含则新增
+      let chatRecord = chatData.ChatRecord
+      if (chatRecord === null || chatRecord.length === 0) {
+        handleRefreshMenu(res.data.data.ChatRecord[0].ChatID)
+      } else {
+        let index = chatRecord.findIndex((item) => item.ChatID === res.data.data.ChatRecord[0].ChatID)
+        if (index < 0) {
+          handleRefreshMenu(res.data.data.ChatRecord[0].ChatID)
+        } else {
+          let reply = clearReply(res.data.data.Reply)
+          appendMessage('assistant', reply)
+        }  
+      }
     } else {
       toast.fail('请求出错，' + res.data.data.errorMsg)
       return toast.show("账号或密码错误", undefined);
     }
   }
 
+  function handleMenuItemClick(id: number, chatID: string, subject: string) {
+    getChatMessages(chatID).then((res) => {
+      if (res.data.code === 200) {
+        // 清空已有消息
+        resetList([])
+        let chatMessages = JSON.parse(res.data.data.messages)
+        chatMessages.forEach((item: any) => {
+          appendMessage(item.role, item.content)
+        })
+        chatContext.messages.splice(0)
+        chatContext.chatid = chatID
+        chatContext.subject = subject
+      } else {
+        toast.fail('请求出错，' + res.data.errorMsg)
+        return toast.show('请求出错，' + res.data.errorMsg, undefined);
+      }
+    });
+  }
+
+  function handleNewChatClick() {
+    // 清空已有消息
+    resetList([])
+    // 新增初始化消息
+    appendMessage('assistant', initialMessages[0].content.text)
+    chatContext.messages.splice(0)
+    chatContext.chatid = uuidv4()
+    chatContext.subject = '这是新的会话'
+  }
+
+  function handleRefreshMenu(chatID: string) {
+    getChatRecord().then((res) => {
+      setChatData(res.data.data)
+      let chatRecord = res.data.data.ChatRecord
+      if (chatRecord === null || chatRecord.length === 0) {
+        handleNewChatClick()
+        return
+      }
+      if (chatID === '') {
+        handleMenuItemClick(chatRecord[0].ID, chatRecord[0].ChatID, chatRecord[0].Subject)
+      } else {
+        let index = chatRecord.findIndex((item: { ChatID: string }) => item.ChatID === chatID)
+        if (index >= 0) {
+          handleMenuItemClick(chatRecord[index].ID, chatRecord[index].ChatID, chatRecord[index].Subject)
+        }
+      }
+    })
+ }
+
+  // 初始化
+  useEffect(() => {
+    handleRefreshMenu('')
+  }, [])
+
   return (
-    <div className={css.app}>
-      <Chat
-        navbar={{
-          leftContent: {
-            icon: 'chevron-left',
-            title: 'Back',
-          },
-          rightContent: [
-            {
-              icon: 'apps',
-              title: 'Applications',
-            },
-            {
-              icon: 'ellipsis-h',
-              title: 'More',
-            },
-          ],
-          title: '基于ChatGPT的AI助手',
-        }}
-        messages={messages}
-        renderMessageContent={renderMessageContent}
-        quickReplies={defaultQuickReplies}
-        onQuickReplyClick={handleQuickReplyClick}
-        onSend={handleSend}
-        onInputFocus={handleFocus}
-      />
-      <Progress value={percentage} />
+    <div>
+      <Layout>
+        <ChatSidebar collapsed={collapsed} toggled={toggled} data={JSON.stringify(chatData)}
+          onMenuItemClick={handleMenuItemClick} onNewChatClick={handleNewChatClick} 
+          refreshMenu={handleRefreshMenu}>
+        </ChatSidebar>
+        <Content style={{height: '100vh'}}>
+          <Layout>
+            <Content style={{height: `calc(100vh - 5px)`}}>
+              <Chat
+                navbar={{
+                  leftContent: {
+                    icon: 'chevron-left',
+                    title: 'Back',
+                  },
+                  rightContent: [
+                    {
+                      icon: 'apps',
+                      title: 'Applications',
+                    },
+                    {
+                      icon: 'ellipsis-h',
+                      title: 'More',
+                    },
+                  ],
+                  title: '基于ChatGPT的AI助手',
+                }}
+                messages={messages}
+                renderMessageContent={renderMessageContent}
+                quickReplies={defaultQuickReplies}
+                onQuickReplyClick={handleQuickReplyClick}
+                onSend={handleSend}
+                onInputFocus={handleFocus}
+              />
+            </Content>
+            <Footer style={{height: '5px', padding: 0}}>
+              <Progress value={percentage} />
+            </Footer>
+          </Layout>
+        </Content>
+      </Layout>
+      <FloatButton icon={collapsed ? <RightOutlined /> : <LeftOutlined />}
+        type="primary" shape='circle' tooltip={collapsed ? '展开会话记录' : '收起会话记录'}
+        onClick={()=> setCollapsed(!collapsed)} style={{ top: 10, left: 10 }} />
+      {contextHolder}
     </div>
   )
 }
 
 export default App
+

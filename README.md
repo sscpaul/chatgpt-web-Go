@@ -266,6 +266,20 @@ WantedBy=multi-user.target
 
 可以使用`journalctl --unit chatgpt-web.service`查看程序日志。
 
+### 如果出现权限方面的问题可以按下面的指令排查和处理问题
+```ini
+# 获取SELinux的安全策略是否强制执行
+getenforce
+# 查看系统审核日志
+tail -f /var/log/audit/audit.log
+# 显示文件夹中的文件的权限及SELinux的上下文权限
+ls -lZ /var/www/chatgpt-web/
+# 为执行文件增加上下文权限
+semanage fcontext -a -t bin_t /var/www/chatgpt-web/chatgpt-web
+# 恢复显示执行文件的上下文权限
+restorecon -vF /var/www/chatgpt-web/chatgpt-web
+```
+
 # 免责声明 Disclaimers
 The code is for demo and testing only. 代码仅用于演示和测试。
 

@@ -20,7 +20,7 @@ const LazyLoad = (
 ) => {
   return (
     <Permission code={code}>
-      <Suspense fallback={<div style={{ margin: "auto" }}>loading...</div>}>
+      <Suspense fallback={<div style={{ margin: "auto" }}>请稍后……</div>}>
         <Component />
       </Suspense>
     </Permission>

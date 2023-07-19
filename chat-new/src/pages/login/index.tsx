@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Flex, FlexItem, Input, Button, toast } from "@chatui/core";
+import { Flex, FlexItem, Button, toast } from "@chatui/core";
 import { useNavigate } from "react-router-dom";
 import css from "../../App.module.css";
 import "./index.less";
@@ -8,6 +8,7 @@ import "@chatui/core/es/styles/index.less";
 import "md-editor-rt/lib/style.css";
 import {login} from '../../services/port'
 import { setCookie, getCookie } from "../../utils/cookie";
+import { Input } from "antd";
 interface LoginFormState {
   username: string;
   password: string;
@@ -23,7 +24,7 @@ const Login = () => {
     if (loginForm.username !== "" && loginForm.password !== "") {
       const res = await login(loginForm);
       if (res.data.code === 200) {
-        setCookie("mojolicious", res.data.data.token, 3);
+        setCookie("mojolicious", res.data.data.token, 30);
         navigate("/");
       } else {
         return toast.show("账号或密码错误", undefined);
@@ -32,7 +33,7 @@ const Login = () => {
       return toast.show("请检查账号与密码是否为空", undefined);
     }
   };
-  const handleInputChange = (val: string, event: any) => {
+  const handleInputChange = (event: any) => {
     const { name, value } = event.target;
     setLoginForm({ ...loginForm, [name]: value });
   };
@@ -60,9 +61,8 @@ const Login = () => {
               type="text"
               name="username"
               id="username"
-              autoSize
               value={loginForm.username}
-              onChange={(val:string, e) => handleInputChange(val, e)}
+              onChange={(e) => handleInputChange(e)}
               placeholder="请输入账号"
             />
           </div>
@@ -72,15 +72,14 @@ const Login = () => {
               type="password"
               name="password"
               id="password"
-              autoSize
               value={loginForm.password}
-              onChange={(val: string, e) => handleInputChange(val, e)}
+              onChange={(e) => handleInputChange(e)}
               placeholder="请输入密码"
             />
           </div>
           <div className={css.m_top}>
             <Button color="primary" block onClick={() => submitLogin()}>
-              登陆
+              登录
             </Button>
           </div>
         </FlexItem>
