@@ -19,7 +19,7 @@ import (
 	"github.com/869413421/chatgpt-web/pkg/model/chat"
 	"github.com/869413421/chatgpt-web/pkg/model/user"
 	"github.com/gin-gonic/gin"
-	gogpt "github.com/sashabaranov/go-gpt3"
+	gogpt "github.com/sashabaranov/go-openai"
 )
 
 const customErrorCode = 280
@@ -349,7 +349,10 @@ func CreateChatCompletion(ctx *gin.Context, request gogpt.ChatCompletionRequest)
 		request.Messages = newMessage
 	}
 
-	if cnf.Model == gogpt.GPT3Dot5Turbo0301 || cnf.Model == gogpt.GPT3Dot5Turbo {
+	if elementExists[string](cnf.Model, []string{
+		gogpt.GPT432K0613, gogpt.GPT432K0314, gogpt.GPT432K, gogpt.GPT40613, gogpt.GPT40314, gogpt.GPT4,
+		gogpt.GPT3Dot5Turbo0613, gogpt.GPT3Dot5Turbo0301, gogpt.GPT3Dot5Turbo16K, gogpt.GPT3Dot5Turbo16K0613,
+		gogpt.GPT3Dot5Turbo, gogpt.GPT3Dot5TurboInstruct}) {
 		request.Model = cnf.Model
 		return client.CreateChatCompletion(ctx, request)
 	} else {
@@ -410,4 +413,14 @@ func newDialContext(socks5 string) (dialContextFunc, error) {
 	} else {
 		return baseDialer.DialContext, nil
 	}
+}
+
+// elementExists 判断元素是否存在于数组中
+func elementExists[T comparable](element T, arr []T) bool {
+	for _, item := range arr {
+		if item == element {
+			return true
+		}
+	}
+	return false
 }

@@ -44,7 +44,7 @@ const StyledCollapsedSidebarHeader = styled.span`
 
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ children, collapsed, ...rest }) => {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '20px',}}>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px'}}>
       {collapsed ? (
         <StyledCollapsedSidebarHeader>
           <div style={{ display: 'flex', alignItems: 'center' }}>

@@ -7,7 +7,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.7
 	github.com/glebarez/sqlite v1.7.0
-	github.com/sashabaranov/go-gpt3 v1.3.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.8.0
 	gorm.io/gorm v1.24.6
@@ -30,6 +29,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230126093431-47fa9a501578 // indirect
+	github.com/sashabaranov/go-openai v1.14.2
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect

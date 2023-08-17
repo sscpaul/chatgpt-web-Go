@@ -1,22 +1,16 @@
 import './chat.css'
-import css from '../../App.module.css'
-import '../../chatui-theme.css'
 import Chat, { Bubble, MessageProps, Progress, toast, useMessages } from '@chatui/core'
 import '@chatui/core/dist/index.css'
-import '@chatui/core/es/styles/index.less'
 import { useState, useEffect } from 'react'
 import clipboardy from 'clipboardy'
 import MdEditor from "md-editor-rt"
 import "md-editor-rt/lib/style.css"
 import sanitizeHtml from 'sanitize-html';
-import {completion, getChatRecord, getChatMessages, updatePassword, createUser} from '../../services/port'
+import {completion, getChatRecord, getChatMessages} from '../../services/port'
 import { ChatSidebar } from '../../components/ChatSidebar'
 import {v4 as uuidv4}  from 'uuid'
 import { FloatButton, Layout, message } from 'antd'
-import { LeftCircleTwoTone, LeftOutlined, RightOutlined } from '@ant-design/icons'
-import { deleteCookie } from '../../utils/cookie'
-import { redirect } from 'react-router-dom'
-import Sider from 'antd/es/layout/Sider'
+import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { Content, Footer } from 'antd/es/layout/layout'
 
 const defaultQuickReplies = [
@@ -139,7 +133,7 @@ function App() {
         const isRichText = richTextRegex.test(text);
         if(isHtml || isRichText){
           return (
-              <Bubble><MdEditor
+              <Bubble style={{maxWidth: '100vw'}}><MdEditor
                   style={{float: 'left'}}
                   modelValue = { text } // 要展示的markdown字符串
                   previewOnly = { true } // 只展示预览框部分
@@ -147,7 +141,7 @@ function App() {
           )
         }else{
           return (
-              <Bubble>{text}</Bubble>
+              <Bubble style={{maxWidth: '100vw'}}>{text}</Bubble>
           )
         }
 
@@ -204,8 +198,7 @@ function App() {
         }  
       }
     } else {
-      toast.fail('请求出错，' + res.data.data.errorMsg)
-      return toast.show("账号或密码错误", undefined);
+      toast.fail('请求出错，' + res.data.errorMsg, 5000)
     }
   }
 

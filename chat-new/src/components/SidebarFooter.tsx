@@ -455,7 +455,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '20px',}}>
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', marginBottom: '12px'}}>
       {collapsed ? (
         <StyledCollapsedSidebarFooter {...rest}>
           <img src={'/person.jpg'} style={{ width: '24px', height: '24px'}} />

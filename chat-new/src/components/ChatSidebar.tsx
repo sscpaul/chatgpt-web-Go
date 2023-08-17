@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ProSidebarProvider, Sidebar, Menu, MenuItem, menuClasses, MenuItemStyles } from 'react-pro-sidebar';
+import { ProSidebarProvider, Menu, MenuItem, menuClasses, MenuItemStyles } from 'react-pro-sidebar';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
 import { Typography } from './Typography';
@@ -200,7 +200,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ children, collapsed, t
       <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', 
         backgroundColor: hexToRgba(themes[theme].sidebar.backgroundColor, hasImage ? 0.9 : 1) }}>
         <SidebarHeader collapsed={collapsed} />
-        <div style={{ flex: 1, marginBottom: '32px' }}>
+        <div>
           <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '8px' }}>
             <Typography variant="body1" fontWeight={600}
               style={{ opacity: collapsed ? 0 : 0.7, letterSpacing: '0.5px', marginLeft: '10px' }}>
@@ -209,9 +209,11 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ children, collapsed, t
             <img src={'/addMessage1.png'} onClick={onNewChatClick}
               title="新建会话" style={{ cursor: 'pointer', marginLeft: '20px', width: '24px', height: '24px'}} />
           </div>
-          <Menu menuItemStyles={menuItemStyles} ref={menuRef} >
-            {renderMenuItems(chatRecord)}
-          </Menu>
+        </div>
+        <div style={{overflowY: 'auto'}}>
+            <Menu menuItemStyles={menuItemStyles} ref={menuRef} >
+              {renderMenuItems(chatRecord)}
+            </Menu>
         </div>
         <SidebarFooter isAdmin={isAdmin} collapsed={collapsed} username={userName} footerEvent={footerEvent} />
       </div>
