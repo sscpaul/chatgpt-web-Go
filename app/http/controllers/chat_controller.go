@@ -309,7 +309,14 @@ func (c *ChatController) Completion(ctx *gin.Context) {
 // CreateChatCompletion 创建聊天回复
 func CreateChatCompletion(ctx *gin.Context, request gogpt.ChatCompletionRequest) (any, error) {
 	cnf := config.LoadConfig()
-	gptConfig := gogpt.DefaultConfig(cnf.ApiKey)
+
+	var gptConfig gogpt.ClientConfig
+	// 通过配置文件中的ApiURL判断是否是Azure API
+	if cnf.ApiURL != "" && strings.Contains(cnf.ApiURL, "openai.azure.com") {
+		gptConfig = gogpt.DefaultAzureConfig(cnf.ApiKey, cnf.ApiURL)
+	} else {
+		gptConfig = gogpt.DefaultConfig(cnf.ApiKey)
+	}
 
 	if cnf.Proxy != "" {
 		transport := &http.Transport{}

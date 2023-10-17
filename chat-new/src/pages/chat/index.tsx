@@ -6,7 +6,7 @@ import clipboardy from 'clipboardy'
 import MdEditor from "md-editor-rt"
 import "md-editor-rt/lib/style.css"
 import sanitizeHtml from 'sanitize-html';
-import {completion, getChatRecord, getChatMessages} from '../../services/port'
+import {completion, getChatRecord, getChatMessages, isMobileDevice} from '../../services/port'
 import { ChatSidebar } from '../../components/ChatSidebar'
 import {v4 as uuidv4}  from 'uuid'
 import { FloatButton, Layout, message } from 'antd'
@@ -42,7 +42,7 @@ let chatContext: { userid: number, chatid: string, subject: string, messages: an
 function App() {
   const { messages, appendMsg, setTyping, prependMsgs, resetList } = useMessages(initialMessages)
   const [percentage, setPercentage] = useState(0)
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(isMobileDevice);
   const [toggled, setToggled] = useState(false);
   const [chatData, setChatData] = useState<{UserID: string, UserName: string, IsAdmin: boolean, ChatRecord: 
         {ID: number, ChatID: string, Subject: string, CreatedAt: string, UpdatedAt: string}[]}>

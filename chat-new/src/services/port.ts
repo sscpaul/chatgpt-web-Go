@@ -111,3 +111,16 @@ export const setConfig = (jsonObject: any) => {
         },
     });
 };
+
+export const isMobileDevice = () => {
+    const userAgent = navigator.userAgent;
+    const mobileKeywords = ['Android', 'iPhone', 'iPad', 'Windows Phone'];
+  
+    for (const keyword of mobileKeywords) {
+      if (userAgent.includes(keyword)) {
+        return true;
+      }
+    }
+  
+    return false;
+};
