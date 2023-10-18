@@ -98,6 +98,7 @@ export const setConfig = (jsonObject: any) => {
         data: {
             api_key: jsonObject.ApiKey,
             api_url: jsonObject.ApiURL,
+            api_version: jsonObject.ApiVersion,
             port: jsonObject.Port,
             listen: jsonObject.Listen,
             bot_desc: jsonObject.BotDesc,

@@ -20,6 +20,8 @@ interface Configuration {
 	ApiKey: string;
 	// openai提供的接口 空字符串使用默认接口
 	ApiURL: string;
+  // API版本
+  ApiVersion: string;
 	// 服务端口
 	Port: number;
 	// 监听接口
@@ -88,7 +90,7 @@ const modalSliderStyle: React.CSSProperties = {
 
 export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapsed, username, isAdmin, footerEvent, ...rest }) => {
   const [updatePwdForm] = React.useState({name: '', oldPwd: '', newPwd: '', confirmPwd: ''});
-  const [configForm] = React.useState<Configuration>({ApiKey: '', ApiURL: '', Port: 0, Listen: '', BotDesc: '', Proxy: '', MaxTokens: 0, Model: '', Temperature: 0, TopP: 0, PresencePenalty: 0, FrequencyPenalty: 0});
+  const [configForm] = React.useState<Configuration>({ApiKey: '', ApiURL: '', ApiVersion: '', Port: 0, Listen: '', BotDesc: '', Proxy: '', MaxTokens: 0, Model: '', Temperature: 0, TopP: 0, PresencePenalty: 0, FrequencyPenalty: 0});
   const [messageApi, contextHolder] = message.useMessage();
   const { TextArea } = Input;
 
@@ -133,6 +135,9 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
         break
       case 'ApiURL':
         configForm.ApiURL = value;
+        break
+      case 'ApiVersion':
+        configForm.ApiVersion = value;
         break
       case 'Port':
         configForm.Port = Number(value);
@@ -302,10 +307,16 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
         </Row>
         <Row align='middle'>
           <Col span={2}>API密钥</Col>
-          <Col span={22}>
+          <Col span={12}>
             <Input type="text" id="ApiKey" name="ApiKey" defaultValue={config.ApiKey}
               style={modalInputStyle}  onChange={(e) => handleConfigChange(e)}
               title="AI调用接口的密钥" placeholder="AI调用接口的密钥" />
+          </Col>
+          <Col span={2} offset={1}>API版本</Col>
+          <Col span={7}>
+            <Input type="text" id="ApiVersion" name="ApiVersion" defaultValue={config.ApiVersion}
+              style={modalInputStyle}  onChange={(e) => handleConfigChange(e)}
+              title="API接口版本，如2023-05-15" placeholder="API接口版本" />
           </Col>
         </Row>
         <Row align='middle'>
@@ -433,6 +444,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
         getConfig().then((res) => {
           configForm.ApiKey = res.data.data.ApiKey;
           configForm.ApiURL = res.data.data.ApiURL;
+          configForm.ApiVersion = res.data.data.ApiVersion;
           configForm.Port = Number(res.data.data.Port);
           configForm.Listen = res.data.data.Listen;
           configForm.BotDesc = res.data.data.BotDesc;

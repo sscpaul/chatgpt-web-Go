@@ -73,6 +73,7 @@ func (c *ChatController) GetConfig(ctx *gin.Context) {
 	c.ResponseJson(ctx, http.StatusOK, "", gin.H{
 		"ApiKey":           cnf.ApiKey,
 		"ApiURL":           cnf.ApiURL,
+		"ApiVersion":       cnf.ApiVersion,
 		"Port":             cnf.Port,
 		"Listen":           cnf.Listen,
 		"BotDesc":          cnf.BotDesc,
@@ -107,6 +108,7 @@ func (c *ChatController) SetConfig(ctx *gin.Context) {
 	cnf := config.LoadConfig()
 	cnf.ApiKey = request.ApiKey
 	cnf.ApiURL = request.ApiURL
+	cnf.ApiVersion = request.ApiVersion
 	cnf.Port = request.Port
 	cnf.Listen = request.Listen
 	cnf.BotDesc = request.BotDesc
@@ -345,6 +347,11 @@ func CreateChatCompletion(ctx *gin.Context, request gogpt.ChatCompletionRequest)
 	// 自定义gptConfig.BaseURL
 	if cnf.ApiURL != "" {
 		gptConfig.BaseURL = cnf.ApiURL
+	}
+
+	// 自定义gptConfig.APIVersion
+	if cnf.ApiVersion != "" {
+		gptConfig.APIVersion = cnf.ApiVersion
 	}
 
 	client := gogpt.NewClientWithConfig(gptConfig)

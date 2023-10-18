@@ -17,6 +17,8 @@ type Configuration struct {
 	ApiKey string `json:"api_key"`
 	// openai提供的接口 空字符串使用默认接口
 	ApiURL string `json:"api_url"`
+	// openai提供的接口版本号
+	ApiVersion string `json:"api_version"`
 	// 服务端口
 	Port int `json:"port"`
 	// 监听接口
@@ -48,6 +50,7 @@ func LoadConfig() *Configuration {
 		config = &Configuration{
 			MaxTokens:        60,
 			ApiURL:           "",
+			ApiVersion:       "",
 			Port:             8080,
 			Listen:           "",
 			Model:            "gpt-3.5-turbo-0301",
@@ -76,6 +79,7 @@ func LoadConfig() *Configuration {
 		// 有环境变量使用环境变量
 		ApiKey := os.Getenv("APIKEY")
 		ApiURL := os.Getenv("APIURL")
+		ApiVersion := os.Getenv("APIVERSION")
 		Model := os.Getenv("MODEL")
 		MaxTokens := os.Getenv("MAX_TOKENS")
 		Temperature := os.Getenv("TEMPREATURE")
@@ -91,6 +95,9 @@ func LoadConfig() *Configuration {
 		}
 		if ApiURL != "" {
 			config.ApiURL = ApiURL
+		}
+		if ApiVersion != "" {
+			config.ApiVersion = ApiVersion
 		}
 		if Proxy != "" {
 			config.Proxy = Proxy
