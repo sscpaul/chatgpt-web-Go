@@ -38,6 +38,7 @@ type Configuration struct {
 	FrequencyPenalty float32 `json:"frequency_penalty"`
 	AuthUser         string  `json:"auth_user"`     // 账号，默认空不验证
 	AuthPassword     string  `json:"auth_password"` // 密码
+	DBURL            string  `json:"db_url"`        // 数据库类型加连接串，用://分隔，如mysql://user:pass@tcp(127.0.0.1:3306)/dbname
 }
 
 var config *Configuration
@@ -58,6 +59,7 @@ func LoadConfig() *Configuration {
 			TopP:             1,
 			FrequencyPenalty: 0.0,
 			PresencePenalty:  0.6,
+			DBURL:            "sqlite://chat.db",
 		}
 
 		// 判断配置文件是否存在，存在直接JSON读取
@@ -90,6 +92,7 @@ func LoadConfig() *Configuration {
 		Proxy := os.Getenv("PROXY")
 		AuthUser := os.Getenv("AUTH_USER")
 		AuthPassword := os.Getenv("AUTH_PASSWORD")
+		DBURL := os.Getenv("DB_URL")
 		if ApiKey != "" {
 			config.ApiKey = ApiKey
 		}
@@ -157,6 +160,10 @@ func LoadConfig() *Configuration {
 
 		if AuthPassword != "" {
 			config.AuthPassword = AuthPassword
+		}
+
+		if DBURL != "" {
+			config.DBURL = DBURL
 		}
 	})
 	if config.ApiKey == "" {

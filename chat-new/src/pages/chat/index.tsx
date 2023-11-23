@@ -240,7 +240,10 @@ function App() {
         return
       }
       if (chatID === '') {
-        handleMenuItemClick(chatRecord[0].ID, chatRecord[0].ChatID, chatRecord[0].Subject)
+        // 为了减少ChatGPT的费用，每次刷新开启新的回话，不再自动选中第一条
+        //  （因为选中第一条继续上次的会话会增加上下文内容，增加费用）
+        // handleMenuItemClick(chatRecord[0].ID, chatRecord[0].ChatID, chatRecord[0].Subject)
+        handleNewChatClick()
       } else {
         let index = chatRecord.findIndex((item: { ChatID: string }) => item.ChatID === chatID)
         if (index >= 0) {

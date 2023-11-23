@@ -11,12 +11,14 @@ import (
 
 // SetupDB 启动数据库
 func SetupDB() {
-	//建立连接池
-	db := model.ConnectDB()
+	// 载入配置信息
+	cf := config.LoadConfig()
+	// 建立连接池
+	db := model.ConnectDB(cf.DBURL)
 
 	migration(db)
 
-	insertAdmin()
+	insertAdmin(cf.AuthUser, cf.AuthPassword)
 }
 
 // migration 迁移
@@ -27,15 +29,15 @@ func migration(db *gorm.DB) {
 	}
 }
 
-func insertAdmin() {
-	cf := config.LoadConfig()
-	if cf.AuthUser != "" {
-		_, err := user.GetByName(cf.AuthUser)
+// 插入管理用户
+func insertAdmin(adminUser string, adminPass string) {
+	if adminUser != "" {
+		_, err := user.GetByName(adminUser)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			logger.Danger("insert admin error:", err)
 		}
 		if err == gorm.ErrRecordNotFound {
-			_, err = user.CreateUser(cf.AuthUser, cf.AuthPassword, true)
+			_, err = user.CreateUser(adminUser, adminPass, true)
 			if err != nil {
 				logger.Danger("create admin error:", err)
 			}

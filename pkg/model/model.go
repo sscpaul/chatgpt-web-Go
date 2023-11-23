@@ -1,9 +1,13 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/glebarez/sqlite"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	gloger "gorm.io/gorm/logger"
 
@@ -30,14 +34,39 @@ func (model BaseModel) CreatedAtDate() string {
 
 var DB *gorm.DB
 
-func ConnectDB() *gorm.DB {
-	dsn := "chat.db"
+func ConnectDB(dbUrl string) *gorm.DB {
 	var err error
-	DB, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
+	DB, err = gorm.Open(getDialector(dbUrl), &gorm.Config{
 		Logger: gloger.Default.LogMode(gloger.Info),
 	})
 	if err != nil {
 		logger.Danger("open sqlite error:", err)
 	}
 	return DB
+}
+
+func getDialector(dbUrl string) gorm.Dialector {
+	var dbType, dsn string
+
+	iPos := strings.Index(dbUrl, "://")
+	if iPos < 0 {
+		dbType = "sqlite"
+		dsn = dbUrl
+	} else {
+		dbType = dbUrl[:iPos]
+		dsn = dbUrl[iPos+3:]
+	}
+
+	switch dbType {
+	case "sqlite":
+		return sqlite.Open(dsn)
+	case "mysql":
+		return mysql.Open(dsn)
+	case "postgre":
+		return postgres.Open(dsn)
+	case "sqlserver":
+		return sqlserver.Open(dsn)
+	default:
+		return nil
+	}
 }
