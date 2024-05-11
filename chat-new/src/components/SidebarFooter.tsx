@@ -5,6 +5,7 @@ import { ChromeOutlined, LogoutOutlined, SettingOutlined, SketchOutlined, UserAd
 import { Col, Dropdown, Input, InputNumber, MenuProps, Modal, Row, Select, Slider, Space, Tooltip, message } from 'antd';
 import { createUser, getConfig, setConfig, updatePassword } from '../services/port';
 import { deleteCookie } from '../utils/cookie';
+import { DefaultOptionType } from 'antd/es/select';
 
 interface SidebarFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -42,6 +43,8 @@ interface Configuration {
 	PresencePenalty: number;
   // 在生成文本时惩罚过于频繁出现的单词，以避免生成过于单一的内容
 	FrequencyPenalty: number;
+  // 模型列表
+  ModelOptions: DefaultOptionType[];
 }
 
 const StyledLink = styled.a`
@@ -90,7 +93,7 @@ const modalSliderStyle: React.CSSProperties = {
 
 export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapsed, username, isAdmin, footerEvent, ...rest }) => {
   const [updatePwdForm] = React.useState({name: '', oldPwd: '', newPwd: '', confirmPwd: ''});
-  const [configForm] = React.useState<Configuration>({ApiKey: '', ApiURL: '', ApiVersion: '', Port: 0, Listen: '', BotDesc: '', Proxy: '', MaxTokens: 0, Model: '', Temperature: 0, TopP: 0, PresencePenalty: 0, FrequencyPenalty: 0});
+  const [configForm] = React.useState<Configuration>({ApiKey: '', ApiURL: '', ApiVersion: '', Port: 0, Listen: '', BotDesc: '', Proxy: '', MaxTokens: 0, Model: '', Temperature: 0, TopP: 0, PresencePenalty: 0, FrequencyPenalty: 0, ModelOptions: [] });
   const [messageApi, contextHolder] = message.useMessage();
   const { TextArea } = Input;
 
@@ -344,17 +347,8 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
         <Row align='middle'>
           <Col span={2}>GPT模型</Col>
           <Col span={12}>
-            <Select id="Model" defaultValue={config.Model}
+            <Select id="Model" defaultValue={config.Model} options={config.ModelOptions}
               style={modalInputStyle} onChange={(e) => configForm.Model = e}>
-              <Select.Option value="gpt-3.5-turbo">gpt-3.5-turbo</Select.Option>
-              <Select.Option value="gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</Select.Option>
-              <Select.Option value="gpt-3.5-turbo-0613">gpt-3.5-turbo-0613</Select.Option>
-              <Select.Option value="text-davinci-003">text-davinci-003</Select.Option>
-              <Select.Option value="text-davinci-002">text-davinci-002</Select.Option>
-              <Select.Option value="code-davinci-002">code-davinci-002</Select.Option>
-              <Select.Option value="gpt-4">gpt-4</Select.Option>
-              <Select.Option value="gpt-4-0613">gpt-4-0613</Select.Option>
-              <Select.Option value="gpt-4-32k">gpt-4-32k</Select.Option>
             </Select>
           </Col>
           <Col span={2} offset={1}>Tokens数</Col>
@@ -455,6 +449,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapse
           configForm.TopP = Number(res.data.data.TopP);
           configForm.PresencePenalty = Number(res.data.data.PresencePenalty);
           configForm.FrequencyPenalty = Number(res.data.data.FrequencyPenalty);
+          configForm.ModelOptions = res.data.data.ModelOptions;
           modalSetConfig(configForm);
         })
         break

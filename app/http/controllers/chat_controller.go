@@ -84,6 +84,7 @@ func (c *ChatController) GetConfig(ctx *gin.Context) {
 		"TopP":             cnf.TopP,
 		"FrequencyPenalty": cnf.FrequencyPenalty,
 		"PresencePenalty":  cnf.PresencePenalty,
+		"ModelOptions":     cnf.ModelOptions,
 	})
 }
 
@@ -363,10 +364,12 @@ func CreateChatCompletion(ctx *gin.Context, request gogpt.ChatCompletionRequest)
 		request.Messages = newMessage
 	}
 
-	if elementExists[string](cnf.Model, []string{
-		gogpt.GPT432K0613, gogpt.GPT432K0314, gogpt.GPT432K, gogpt.GPT40613, gogpt.GPT40314, gogpt.GPT4,
-		gogpt.GPT3Dot5Turbo0613, gogpt.GPT3Dot5Turbo0301, gogpt.GPT3Dot5Turbo16K, gogpt.GPT3Dot5Turbo16K0613,
-		gogpt.GPT3Dot5Turbo, gogpt.GPT3Dot5TurboInstruct}) {
+	if !elementExists[string](cnf.Model, []string{
+		gogpt.CodexCodeDavinci002, gogpt.CodexCodeCushman001, gogpt.CodexCodeDavinci001,
+		gogpt.GPT3TextDavinci003, gogpt.GPT3TextDavinci002, gogpt.GPT3TextCurie001,
+		gogpt.GPT3TextBabbage001, gogpt.GPT3TextAda001, gogpt.GPT3TextDavinci001,
+		gogpt.GPT3DavinciInstructBeta, gogpt.GPT3Davinci, gogpt.GPT3CurieInstructBeta,
+		gogpt.GPT3Curie, gogpt.GPT3Ada, gogpt.GPT3Babbage}) {
 		request.Model = cnf.Model
 		return client.CreateChatCompletion(ctx, request)
 	} else {

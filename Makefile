@@ -18,7 +18,7 @@ build-linux:
 # PowerShell 代码
     $env:CGO_ENABLED=0
     $env:GOOS="linux"
-    $env:GOARCH="arm64"
+    $env:GOARCH="amd64" # arm64
     $env:GIN_MODE="release"
     go build -o ./build/chatgpt-web/chatgpt-web ./main.go
 

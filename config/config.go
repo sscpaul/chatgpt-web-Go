@@ -11,6 +11,11 @@ import (
 	"github.com/869413421/chatgpt-web/pkg/logger"
 )
 
+type Model struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
 // Configuration 项目配置
 type Configuration struct {
 	// gpt apikey
@@ -39,6 +44,7 @@ type Configuration struct {
 	AuthUser         string  `json:"auth_user"`     // 账号，默认空不验证
 	AuthPassword     string  `json:"auth_password"` // 密码
 	DBURL            string  `json:"db_url"`        // 数据库类型加连接串，用://分隔，如mysql://user:pass@tcp(127.0.0.1:3306)/dbname
+	ModelOptions     []Model `json:"model_options"` // OpenAI模型列表，[{"value": "gpt-4", "label": "gpt-4"}]
 }
 
 var config *Configuration
